@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UM MODE OFF — Free Trial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a; --surface: #141414; --border: #262626;
+    --red: #e0263f; --red-bright: #ff4d6a;
+    --text: #f0f0f0; --muted: #8a8a8a; --success: #2fe28f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg);
+    background-image: radial-gradient(circle at 20% 20%, rgba(224,38,63,0.08), transparent 40%),
+                       radial-gradient(circle at 80% 80%, rgba(224,38,63,0.06), transparent 40%);
+    color: var(--text); font-family: 'Share Tech Mono', monospace;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events: none; z-index: 1;
+  }
+  .card {
+    position: relative; z-index: 2; width: 100%; max-width: 440px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+    padding: 32px 28px;
+    box-shadow: 0 0 0 1px rgba(224,38,63,0.15), 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .brand .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+    box-shadow: 0 0 8px var(--red); animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .brand h1 { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 3px; margin: 0; color: var(--text); }
+  .brand h1 span { color: var(--red); }
+  .tagline { color: var(--muted); font-size: 12px; margin: 0 0 20px 0; letter-spacing: 1px; }
+  #boot { font-size: 12px; color: var(--success); min-height: 90px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 8px; }
+  #boot .cursor { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .step { display: none; }
+  .step.active { display: block; animation: fadein .3s ease; }
+  @keyframes fadein { from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:translateY(0)} }
+  h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; letter-spacing: 1px; margin: 0 0 6px 0; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 18px 0; line-height: 1.5; }
+  label { display: block; font-size: 11px; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
+  input[type=text], input[type=tel] {
+    width: 100%; background: #0d0d0d; border: 1px solid var(--border); color: var(--text);
+    font-family: 'Share Tech Mono', monospace; font-size: 16px; letter-spacing: 2px;
+    padding: 12px 14px; border-radius: 3px; outline: none; transition: border-color .15s;
+  }
+  input:focus { border-color: var(--red); }
+  button {
+    width: 100%; margin-top: 16px; background: var(--red); color: #fff; border: none;
+    padding: 13px; font-family: 'Orbitron', sans-serif; font-weight: 600; font-size: 12.5px;
+    letter-spacing: 2px; border-radius: 3px; cursor: pointer; transition: background .15s, transform .1s;
+    text-align: center; text-decoration: none; display: block;
+  }
+  button:hover, a.button:hover { background: var(--red-bright); }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); margin-top: 8px; }
+  button.ghost:hover { background: transparent; border-color: var(--muted); color: var(--text); }
+  .msg { font-size: 12.5px; margin-top: 12px; line-height: 1.5; display: none; }
+  .msg.show { display: block; }
+  .msg.error { color: var(--red-bright); }
+  .msg.success { color: var(--success); }
+  .badge {
+    display: inline-block; font-size: 10.5px; letter-spacing: 1px; color: var(--red);
+    border: 1px solid rgba(224,38,63,0.4); padding: 3px 8px; border-radius: 20px; margin-bottom: 14px;
+  }
+  .success-icon { font-size: 40px; text-align: center; margin-bottom: 8px; }
+  .step-indicator { display: flex; gap: 6px; margin-bottom: 18px; }
+  .step-indicator .dot2 { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
+  .step-indicator .dot2.done { background: var(--red); }
+  footer { text-align: center; color: var(--muted); font-size: 10.5px; margin-top: 22px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><span class="dot"></span><h1>UM <span>MODE OFF</span></h1></div>
+    <p class="tagline">SERVER-SIDE VERIFIED HOSTING</p>
+
+    <div id="boot"><span class="cursor">█</span></div>
+
+    <div id="form-area" style="display:none;">
+      <span class="badge">🎁 {{ trial_days }} DAY FREE TRIAL</span>
+      <div class="step-indicator">
+        <div class="dot2" id="ind1"></div><div class="dot2" id="ind2"></div>
+        <div class="dot2" id="ind3"></div><div class="dot2" id="ind4"></div>
+      </div>
+
+      <!-- STEP 1: Telegram ID -->
+      <div class="step active" id="step1">
+        <h2>Verify Your Identity</h2>
+        <p class="hint">Apni Telegram numeric ID daalo. Pata nahi hai? Bot mein <code>/whoami</code> bhejo.</p>
+        <label>Telegram ID</label>
+        <input type="tel" id="tg-id" placeholder="e.g. 123456789" inputmode="numeric">
+        <button id="btn-start" onclick="startTrial()">CHECK & CONTINUE</button>
+        <div class="msg" id="msg1"></div>
+      </div>
+
+      <!-- STEP 2: Task lock -->
+      <div class="step" id="step2">
+        <h2>Complete Task</h2>
+        <p class="hint" id="taskHint">Neeche diye link par jaake task complete karo — automatically wapas is page par aa jaoge.</p>
+        <a class="button" id="lockerLink" href="#" target="_blank" onclick="markTaskClicked()">OPEN TASK LINK</a>
+        <button class="ghost" onclick="goToStep(1)">← Back</button>
+        <div class="msg" id="msg2b"></div>
+      </div>
+
+      <!-- STEP 3: PIN -->
+      <div class="step" id="step3">
+        <h2>Enter PIN</h2>
+        <p class="hint">Task verify ho gaya ✅ — Telegram par bheja gaya PIN yahan daalo. 5 minute ke liye valid hai.</p>
+        <label>6-Digit PIN</label>
+        <input type="text" id="pin" placeholder="••••••" maxlength="6" inputmode="numeric">
+        <button id="btn-verify-pin" onclick="verifyPin()">VERIFY & CLAIM TRIAL</button>
+        <div class="msg" id="msg3"></div>
+      </div>
+
+      <!-- STEP 4: Success -->
+      <div class="step" id="step4">
+        <div class="success-icon">✅</div>
+        <h2 style="text-align:center;">Trial Activated</h2>
+        <p class="hint" style="text-align:center;" id="successText"></p>
+        <p class="hint" style="text-align:center;">Apna Telegram bot kholo aur file bhej do.</p>
+      </div>
+    </div>
+
+    <footer>NO KEY IS EVER SHOWN HERE — DELIVERED VIA TELEGRAM ONLY</footer>
+  </div>
+
+<script>
+  const bootLines = [
+    "> initializing connection...",
+    "> server-side verification module loaded",
+    "> checking trial eligibility rules...",
+    "> ready.",
+  ];
+  const bootEl = document.getElementById('boot');
+  let bootText = "", li = 0, ci = 0;
+  function typeBoot() {
+    if (li >= bootLines.length) { document.getElementById('form-area').style.display = 'block'; afterBoot(); return; }
+    const line = bootLines[li];
+    if (ci <= line.length) {
+      bootEl.innerHTML = bootText + line.slice(0, ci) + '<span class="cursor">█</span>';
+      ci++; setTimeout(typeBoot, 18);
+    } else { bootText += line + "\n"; li++; ci = 0; setTimeout(typeBoot, 120); }
+  }
+  typeBoot();
+
+  let currentToken = null;
+
+  function goToStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('ind' + i).classList.toggle('done', i <= n);
+    }
+  }
+
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg show ' + type;
+  }
+
+  // if we were bounced back here from /unlock/<token>, jump straight to the PIN step
+  function afterBoot() {
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('token');
+    if (tokenFromUrl) {
+      currentToken = tokenFromUrl;
+      goToStep(3);
+      requestPinForToken();
+    }
+  }
+
+  async function startTrial() {
+    const idInput = document.getElementById('tg-id');
+    const btn = document.getElementById('btn-start');
+    const id = idInput.value.trim();
+    if (!id) { showMsg('msg1', 'Telegram ID daalo.', 'error'); return; }
+
+    btn.disabled = true; btn.textContent = 'CHECKING...';
+    try {
+      const res = await fetch('/api/start-trial', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({telegram_id: id})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        currentToken = data.token;
+        document.getElementById('lockerLink').href = data.locked_url;
+        if (!data.locker_active) {
+          document.getElementById('taskHint').textContent = 'Task-locker abhi configure nahi hai — link seedha continue kar dega.';
+        }
+        goToStep(2);
+      } else {
+        showMsg('msg1', data.error || 'Kuch galat ho gaya.', 'error');
+      }
+    } catch (e) {
+      showMsg('msg1', 'Network error — server se connect nahi ho paaya.', 'error');
+    }
+    btn.disabled = false; btn.textContent = 'CHECK & CONTINUE';
+  }
+
+  function markTaskClicked() {
+    // nothing to do client-side — the locker redirects back to /unlock/<token>
+    // which is what actually marks the task done, server-side.
+  }
+
+  async function requestPinForToken() {
+    try {
+      const res = await fetch('/api/request-pin', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token: currentToken})
+      });
+      const data = await res.json();
+      if (!data.ok) showMsg('msg3', data.error || 'Kuch galat ho gaya.', 'error');
+    } catch (e) {
+      showMsg('msg3', 'Network error.', 'error');
+    }
+  }
+
+  async function verifyPin() {
+    const pinInput = document.getElementById('pin');
+    const btn = document.getElementById('btn-verify-pin');
+    const pin = pinInput.value.trim();
+    if (!pin) { showMsg('msg3', 'PIN daalo.', 'error'); return; }
+
+    btn.disabled = true; btn.textContent = 'VERIFYING...';
+    try {
+      const res = await fetch('/api/verify-pin', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token: currentToken, pin: pin})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        document.getElementById('successText').textContent = data.message;
+        goToStep(4);
+      } else {
+        showMsg('msg3', data.error || 'Kuch galat ho gaya.', 'error');
+      }
+    } catch (e) {
+      showMsg('msg3', 'Network error.', 'error');
+    }
+    btn.disabled = false; btn.textContent = 'VERIFY & CLAIM TRIAL';
+  }
+</script>
+</body>
+</html>

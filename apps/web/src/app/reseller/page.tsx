@@ -1,0 +1,1 @@
+export default function Reseller(){return <main className="p-8"><h1 className="text-4xl font-black">Reseller Center</h1><div className="mt-8 grid gap-4 md:grid-cols-4">{['Minimum ₹1500 wallet','30 day validity','Manage customers','View earnings'].map(x=><div className="card" key={x}>{x}</div>)}</div></main>}

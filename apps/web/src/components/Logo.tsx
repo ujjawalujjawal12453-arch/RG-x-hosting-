@@ -1,0 +1,1 @@
+export function Logo(){return <div className="flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 font-black shadow-glow">RX</div><div><p className="text-lg font-black tracking-tight">Ravan X</p><p className="-mt-1 text-xs text-cyan-200">Hosting</p></div></div>}

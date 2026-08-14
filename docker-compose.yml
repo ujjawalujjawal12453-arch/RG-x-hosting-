@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ravan
+      POSTGRES_PASSWORD: ravan
+      POSTGRES_DB: ravan_x_hosting
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    ports: ["5432:5432"]
+  api:
+    build: .
+    command: sh -c "npx prisma migrate deploy && npm run seed && npm run start -w apps/api"
+    env_file: .env
+    volumes:
+      - ./uploads:/app/uploads
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on: [postgres]
+    ports: ["4000:4000"]
+  web:
+    build: .
+    command: npm run start -w apps/web
+    env_file: .env
+    depends_on: [api]
+    ports: ["3000:3000"]
+volumes: { postgres_data: {} }

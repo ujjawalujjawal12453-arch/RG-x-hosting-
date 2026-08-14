@@ -1,0 +1,2 @@
+import Link from 'next/link';import { Logo } from '@/components/Logo';
+export default function Login(){return <main className="grid min-h-screen place-items-center p-6"><form className="card w-full max-w-md" action="/dashboard"><Logo/><h1 className="mt-8 text-3xl font-black">Login</h1><input className="input mt-6" placeholder="Email"/><input className="input mt-3" placeholder="Password" type="password"/><button className="btn mt-6 w-full">Login</button><Link className="mt-4 block text-center text-cyan-300" href="/auth/register">Create account</Link></form></main>}

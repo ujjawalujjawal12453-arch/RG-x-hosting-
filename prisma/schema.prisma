@@ -1,0 +1,20 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+enum Role { USER RESELLER ADMIN }
+enum HostingStatus { PENDING RUNNING STOPPED FAILED DELETED NEEDS_SERVER }
+enum Runtime { PYTHON NODE JAVA }
+enum TransactionType { CREDIT DEBIT REFUND PURCHASE TOPUP }
+enum ApprovalStatus { PENDING APPROVED REJECTED }
+enum TicketStatus { OPEN PENDING CLOSED }
+model User { id String @id @default(cuid()) email String @unique name String passwordHash String role Role @default(USER) emailVerified Boolean @default(false) verificationToken String? resetToken String? resetTokenExpires DateTime? wallet Wallet? hostings Hosting[] tickets Ticket[] topUps TopUp[] reseller Reseller? auditLogs AuditLog[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Wallet { id String @id @default(cuid()) userId String @unique balance Decimal @default(0) user User @relation(fields:[userId], references:[id], onDelete:Cascade) transactions Transaction[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Plan { id String @id @default(cuid()) name String runtime Runtime cpu Int ramMb Int storageMb Int monthlyPrice Decimal yearlyPrice Decimal active Boolean @default(true) hostings Hosting[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Hosting { id String @id @default(cuid()) userId String planId String name String runtime Runtime status HostingStatus @default(PENDING) containerId String? domain String? port Int? path String? suspended Boolean @default(false) resellerId String? user User @relation(fields:[userId], references:[id]) plan Plan @relation(fields:[planId], references:[id]) reseller Reseller? @relation(fields:[resellerId], references:[id]) invoices Invoice[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Transaction { id String @id @default(cuid()) walletId String type TransactionType amount Decimal description String reference String? wallet Wallet @relation(fields:[walletId], references:[id], onDelete:Cascade) createdAt DateTime @default(now()) }
+model TopUp { id String @id @default(cuid()) userId String amount Decimal screenshotPath String? status ApprovalStatus @default(PENDING) adminNote String? user User @relation(fields:[userId], references:[id]) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Invoice { id String @id @default(cuid()) hostingId String amount Decimal status String @default("PAID") pdfPath String? hosting Hosting @relation(fields:[hostingId], references:[id]) createdAt DateTime @default(now()) }
+model Ticket { id String @id @default(cuid()) userId String subject String message String status TicketStatus @default(OPEN) user User @relation(fields:[userId], references:[id]) replies TicketReply[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model TicketReply { id String @id @default(cuid()) ticketId String authorId String message String ticket Ticket @relation(fields:[ticketId], references:[id], onDelete:Cascade) createdAt DateTime @default(now()) }
+model Reseller { id String @id @default(cuid()) userId String @unique status ApprovalStatus @default(PENDING) validUntil DateTime? earnings Decimal @default(0) user User @relation(fields:[userId], references:[id]) hostings Hosting[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model AuditLog { id String @id @default(cuid()) userId String? action String entity String entityId String? metadata Json? ip String? user User? @relation(fields:[userId], references:[id]) createdAt DateTime @default(now()) }
+model Setting { key String @id value Json updatedAt DateTime @updatedAt }

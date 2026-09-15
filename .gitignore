@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 data/*.db
 *.log
+
+.ravan_x_hosting.json
+ravan_x_data/
+.venv/

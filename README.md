@@ -1,121 +1,53 @@
-# UM MODE OFF — Hosting Bot + Free Trial Website (ONE project)
+# Ravan X Hosting
 
-Ye bot aur website **ab wapas ek hi project** mein hain — sirf isliye alag
-kiye the taaki dekha ja sake, par usse database mismatch ho raha tha (do
-alag `bot.db` files ban rahi thi). Ab dono **ek hi `config.py` aur
-`database.py`** use karte hain — matlab ek hi `data/bot.db` file, kabhi
-mismatch nahi ho sakta, structurally hi possible nahi hai.
+Ravan X Hosting has two deployment surfaces:
 
----
+- **`ravan_x_hosting.py`** is the requested single-file Telegram hosting control plane. It can be copied to an Ubuntu server and run directly. It provisions and controls **real Docker containers**; it never reports an app as running when Docker is unavailable.
+- **`apps/api` + `apps/web`** is the browser-oriented PostgreSQL/Prisma control plane, with its deployment configuration and API reference retained in this repository.
 
-## File Map — kya kahan hai, line-wise
+## Single-file Telegram hosting panel
 
-```
-telegram-hosting-bot/
-│
-├── main.py                  ← RENDER/normal use ke liye ye chalao — bot + website DONO ek sath
-├── bot.py                  ← Sirf bot chalana ho to isko chalao: python3 bot.py
-├── config.py                ← SAB settings yahan (.env se load hoti hain). BOT_TOKEN, ADMIN_ID, saare rates/limits
-├── database.py               ← Database ka poora logic. Bot aur website DONO isi file ko use karte hain — isiliye ab mismatch nahi hoga
-├── process_manager.py        ← User ke uploaded bots/APIs ko real mein chalata/rokta hai
-├── keyboards.py               ← Telegram ke buttons/menus
-├── jobs.py                    ← Background checks (expiry, renewal reminders)
-├── rules.py                   ← Violation/strike/ban system
-├── scanner.py                  ← Uploaded files ka quick-scan (risky code detect karta hai)
-├── ui_utils.py                  ← Chhota helper (photo/text message edit karne ke liye)
-├── requirements.txt              ← Saari Python libraries jo install karni hain
-├── .env.example                   ← Iski copy banao `.env` naam se, phir values bharo
-├── Procfile                        ← Render deployment ke liye (website chalane ka command)
-│
-├── handlers/
-│   ├── user.py                      ← User ke saare buttons/messages (key activate, upload, trial, referral)
-│   └── admin.py                      ← Admin panel (key generate, approve/reject, stats, ban/unban)
-│
-├── data/
-│   ├── bot.db                         ← ASLI DATABASE — bot aur website dono isi file ko padhte/likhte hain
-│   ├── qr/payment_qr.png               ← Tumhara payment QR
-│   ├── branding/logo.png                ← Tumhara "UM Mode Off" logo
-│   └── user_files/                       ← Users ne jo files upload ki, wahan save hoti hain
-│
-└── website/
-    ├── app.py                          ← WEBSITE ka main entry point. Isko chalao: python3 website/app.py
-    ├── linklocker.py                    ← GPLinks (ya jo bhi) API ka connection
-    └── templates/
-        ├── index.html                    ← Free-trial claim page ka design
-        └── message.html                   ← Error/expired-link page
-```
+### What it does
 
-**Sabse zaroori baat:** `website/app.py` `config.py` aur `database.py` ko
-seedha `bot.py` wale folder se import karta hai (upar wale folder se) —
-isiliye ab dono files **hamesha** same `data/bot.db` ko dekhenge. Ye
-`website/` ko `telegram-hosting-bot/` ke ANDAR hi rakhna zaroori banata hai
-— bahar mat nikaalna, warna wahi purani mismatch wapas aa jaayegi.
+`ravan_x_hosting.py` is intentionally self-contained: its Telegram UI, configuration bootstrap, SQLite persistence, Docker lifecycle integration, project upload, runtime detection, wallet ledger, support tickets, and admin actions live in one Python file.
 
----
+- On its **first** local run, it asks only for `BOT_TOKEN` and the numeric `ADMIN_ID`, then saves them in a private `.ravan_x_hosting.json` file (`0600` when the operating system permits it). Later starts do not ask again. You can instead set `BOT_TOKEN` and `ADMIN_ID` as environment variables for unattended deployment.
+- The primary controls use Telegram's **reply keyboard**, so they appear below the conversation input: Deploy, My Apps, Wallet, Usage, Support, Server, and Admin (admin only).
+- Telegram itself does not expose an API for arbitrary button/card colours. The bot uses the native keyboard below chat, emoji state indicators, and clear status messages rather than claiming colour control it cannot perform.
+- Upload a `.zip`, `.py`, `.js`, or `.jar`; the bot detects Python, Node.js, or Java and uses Docker to create a resource-limited container (`512m`, `0.50` CPU, PID limit, localhost-only published port). It offers start, stop, restart, logs, usage, and deletion from Telegram.
+- If the server has no Docker CLI/access, deploy and server-status actions clearly return the prerequisite instead of inventing a running hosting service.
 
-## Setup — line by line
+### Install and run on Ubuntu
 
 ```bash
-cd telegram-hosting-bot
-pip install -r requirements.txt --break-system-packages
+sudo apt-get update
+sudo apt-get install -y python3 python3-venv docker.io
+sudo usermod -aG docker "$USER"  # log out/in afterwards so Docker access applies
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+python3 ravan_x_hosting.py
+```
+
+The first run asks for the bot token and numeric admin Telegram ID exactly once. Keep `.ravan_x_hosting.json`, `ravan_x_data/`, and the source file on persistent storage. Do **not** commit the generated JSON file: it contains the bot token.
+
+For a systemd deployment, use an environment file with `BOT_TOKEN=...` and `ADMIN_ID=...`, run the script as a restricted service user that belongs to the `docker` group, and protect the host: Docker socket access is equivalent to powerful host-level access.
+
+### Real infrastructure boundaries
+
+This bot controls Docker on the machine where it runs. It does not acquire a VPS, DNS records, TLS certificates, payment-gateway credentials, or Telegram token for you. To publish a container publicly, configure DNS and a reverse proxy such as Nginx/Caddy on your server; containers are deliberately bound to `127.0.0.1` by default. The wallet ledger is real local SQLite data; production payment crediting should be wired to a verified gateway webhook, not screenshot automation.
+
+## Browser control plane
+
+The monorepo's Next.js/Express/PostgreSQL stack remains available for browser dashboards, Prisma persistence, invoices, top-up approval, reseller workflows, reverse-proxy config generation and Socket.IO monitoring.
+
+```bash
 cp .env.example .env
+npm install
+npm run prisma:generate
+npx prisma migrate dev --name init
+npm run seed
+npm run dev
 ```
 
-`.env` kholo, ye bharo:
-- `BOT_TOKEN` — @BotFather se
-- `ADMIN_ID` — apna Telegram numeric ID (bot start karke `/whoami` se milega)
-- `LINKLOCKER_API_KEY` — GPLinks (ya jo use karna hai) ka key
-- `PUBLIC_BASE_URL` — website jahan live hogi uska address (local test ke
-  liye `http://localhost:5000` chalega)
-
-## Chalana — Termux/VPS par (dono ek sath, ek hi command se)
-
-```bash
-cd telegram-hosting-bot
-python3 main.py
-```
-
-Bas itna — `main.py` bot aur website **dono ek hi process mein** chala deta
-hai (website background mein, bot foreground mein). Alag-alag terminal
-kholne ki zaroorat nahi.
-
-*(Agar kabhi sirf ek hi chalana ho testing ke liye: `python3 bot.py` ya
-`python3 website/app.py` bhi alag-alag chal sakte hain — par normal use
-ke liye `main.py` hi chalao.)*
-
-## Render par deploy karna hai to (EK hi Web Service — bas)
-
-Poora `telegram-hosting-bot` folder GitHub par push karo (jaisa
-`deploy_helper.py` se pehle kiya). Render par:
-
-1. **New → Web Service** → apna GitHub repo connect karo
-2. Build command: `pip install -r requirements.txt`
-3. Start command: khud-ba-khud `Procfile` se le lega (`python3 main.py`)
-4. Environment variables Render ke **Environment tab** mein daalo — wahi
-   sab jo `.env` mein hain (`BOT_TOKEN`, `ADMIN_ID`, `LINKLOCKER_API_KEY`, etc.)
-5. **Sabse zaroori:** `PUBLIC_BASE_URL` ko apne Render URL par set karo
-   (deploy hone ke baad Render jo URL dega, jaise
-   `https://tumhara-app.onrender.com`) — agar ye galat/localhost raha to
-   free-trial ka link kabhi kaam nahi karega. `main.py` startup par isko
-   khud check karke warning bhi dega agar galat lage.
-
-Render ko **do alag services banane ki zaroorat nahi** — ek hi Web Service
-`main.py` ke through dono cheezein (bot polling + website) sambhal leta hai.
-
-⚠️ Render ka free-tier disk ephemeral hai (restart par `data/bot.db` reset
-ho sakta hai) — jaisa pehle discuss kiya tha, abhi ke liye theek hai.
-
----
-
-## Features (sab wahi hain jo pehle the)
-
-- 🤖 3 categories: Bot / API / Website hosting, alag pricing
-- ⭐ Priority aur 👑 VIP tiers (extra charge, extra resource/queue-priority)
-- 🎁 Free Trial — website se, GPLinks task-lock + Telegram PIN verify,
-  16-digit trial key (paid keys 8-digit)
-- 👥 Referral bonus, 🔁 Renewal discount
-- 📋 Waitlist — server full hone par bhi request khoti nahi
-- 🚫 Rules & violations — risky upload / bruteforce / spam par strike,
-  3 strikes = auto-ban
-- 📢 Broadcast, 📊 Stats (aaj ka + all-time revenue)
-- 💳 QR payment, 📸 screenshot turant admin ko, quick-scan on every upload
+See [`docs/API.md`](docs/API.md) for REST and realtime endpoints. For production, provision Docker, PostgreSQL, Nginx, DNS, TLS, SMTP, and payment-gateway credentials; then use `docker compose up -d --build` and configure `nginx/ravan-x.conf` for your hostname.
